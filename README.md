@@ -7,3 +7,10 @@ At the moment the program outputs a line for each page it checks (along with any
 
 ## Warning
 Please be aware that if you run this program it will request every webpage from the site you specify so use with caution. Other people might not like you repeated hammering their servers with this number of requests.
+
+## Educational Links
+
+ * Can be used to talk about the basics of the Google page rank algorithm (i.e. ranking pages by links).
+ * Can be used to demonstrate the differences between sets, arrays and tuples in Python.
+ * Can be used to demonstrate regular expressions and searching text files (that is how the links are extracted).
+ * Can be used to show how network resources can be accessed via Python.
