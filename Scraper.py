@@ -22,10 +22,15 @@ else:
 
 urlsChecked = set()
 urlsToCheck = {inputURL}
-linkCount = {}
+
+# Put inputURL to -1 so that it doesn't
+# count the fact that we are starting there
+# as a link.
+linkCount = {inputURL: -1}
 
 while len(urlsToCheck) > 0:
     currentURL = urlsToCheck.pop()
+    urlsChecked.add(currentURL)
     print("Checking page (" + currentURL + ")")
 
     try:
@@ -54,9 +59,7 @@ while len(urlsToCheck) > 0:
         if url in linkCount:
             linkCount[url] += 1
         else:
-            linkCount[url] = 0
-
-    urlsChecked.add(currentURL)
+            linkCount[url] = 1
 
 linksTuples = []
 for key in linkCount:
