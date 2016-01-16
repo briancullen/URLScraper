@@ -1,5 +1,5 @@
 # URLScraper
-Simple program to count the number of links to pages in a website and rank them by the number of links. Created as part of an experiment with a class with a class when we were discussing ways in which google ranked pages.
+Simple Python program to count the number of links to pages in a website and rank them by the number of links. Created as part of an experiment with a class with a class when we were discussing ways in which google ranked pages. Am currently messing with a java version but it is not working at the moment.
 
 There are now two versions of the program, one threaded and one not. To run the program simply execute the provided python file (in the `python_src` folder) with a Python3 interpreter. Both of the programs will ask for the base URL which should point to the home page for the website that you want to check. For example to check Google you would use http://www.google.com/ as the baseURL.
 
