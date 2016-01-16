@@ -6,9 +6,11 @@ All versions of the program will ask for the base URL which should point to the 
 At the moment some versions of the program outputs a line for each page it checks (along with any errors) so for large sites there will be a lot of output. At the end a sorted set of tuples will be printed out showing how many links there were to each page in the website. The page with the largest number of links is shown at the bottom of the list.
 
 ## Java
-The eclipse project files are part of the repository if you want to run it that way. Otherwise the following command executed from the root directory for the project will suffice.
+The eclipse project files are part of the repository if you want to run it that way. Otherwise the following commands executed from the root directory for the project will suffice.
 
 ```
+mkdir bin
+javac -classpath "lib/jsoup-1.8.3.jar" -d bin src/net/mrcullen/urlscraper/*
 java -classpath "bin:lib/jsoup-1.8.3.jar" net.mrcullen.urlscraper.URLScraper
 ```
 

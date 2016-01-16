@@ -3,16 +3,12 @@ package net.mrcullen.urlscraper;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 public class SiteInfo implements PageLinksFactory {
 	protected ConcurrentHashMap<URL, PageLinks> pages = new ConcurrentHashMap<URL, PageLinks>();
