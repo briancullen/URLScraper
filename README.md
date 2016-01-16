@@ -1,9 +1,19 @@
 # URLScraper
-Simple Python program to count the number of links to pages in a website and rank them by the number of links. Created as part of an experiment with a class with a class when we were discussing ways in which google ranked pages. Am currently messing with a java version but it is not working at the moment.
+Simple programs to count the number of links to pages in a website and rank the webpages by the number of links. Created as part of an experiment with a class with a class when we were discussing ways in which google ranked pages. There are now three different versions, two in Python and one in Java.
 
-There are now two versions of the program, one threaded and one not. To run the program simply execute the provided python file (in the `python_src` folder) with a Python3 interpreter. Both of the programs will ask for the base URL which should point to the home page for the website that you want to check. For example to check Google you would use http://www.google.com/ as the baseURL.
+All versions of the program will ask for the base URL which should point to the home page for the website that you want to check. For example to check Google you would use http://www.google.com/ as the base URL.
 
-At the moment the program outputs a line for each page it checks (along with any errors) so for large sites there will be a lot of output. At the end a sorted set of tuples will be printed out showing how many links there were to each page in the website. The page with the largest number of links is shown at the bottom of the list.
+At the moment some versions of the program outputs a line for each page it checks (along with any errors) so for large sites there will be a lot of output. At the end a sorted set of tuples will be printed out showing how many links there were to each page in the website. The page with the largest number of links is shown at the bottom of the list.
+
+## Java
+The eclipse project files are part of the repository if you want to run it that way. Otherwise the following command executed from the root directory for the project will suffice.
+
+```
+java -classpath "bin:lib/jsoup-1.8.3.jar" net.mrcullen.urlscraper.URLScraper
+```
+
+## Python
+There are now two versions of the python program, one threaded and one not. To run the program simply execute the provided python file (in the `python_src` folder) with a Python3 interpreter.
 
 ## Warning
 Please be aware that if you run this program it will request every webpage from the site you specify so use with caution. Other people might not like you repeated hammering their servers with this number of requests.

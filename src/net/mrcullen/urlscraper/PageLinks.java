@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashSet;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jsoup.nodes.Document;
@@ -12,7 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.jsoup.Jsoup;
 
-public class PageLinks implements Runnable {
+public class PageLinks implements Runnable, Comparable<PageLinks> {
 	protected HashSet<PageLinks> links = new HashSet<PageLinks>();
 	protected PageLinksFactory factory = null;
 	
@@ -60,8 +59,13 @@ public class PageLinks implements Runnable {
 			processPage();
 		}
 		catch (IOException exception) {
-			System.out.println("*** Unable to process: " + pageURL.toString() + exception.getMessage());
+			System.err.println("*** Unable to process: " + exception.getMessage());
 		}
+	}
+
+	@Override
+	public int compareTo(PageLinks other) {
+		return linkCount - other.linkCount;
 	}
 	
 }

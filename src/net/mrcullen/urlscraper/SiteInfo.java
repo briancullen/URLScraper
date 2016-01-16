@@ -2,12 +2,22 @@ package net.mrcullen.urlscraper;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Hashtable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.TreeSet;
+import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 public class SiteInfo implements PageLinksFactory {
-	public Hashtable<URL, PageLinks> pages = new Hashtable<URL, PageLinks>();
+	protected ConcurrentHashMap<URL, PageLinks> pages = new ConcurrentHashMap<URL, PageLinks>();
+	protected transient Vector<PageLinks> pagesToCheck = new Vector<PageLinks> ();
+	
 	
 	protected URL baseURL = null;
 	protected URL startURL = null;
@@ -31,16 +41,36 @@ public class SiteInfo implements PageLinksFactory {
 	}
 	
 	public void process () {
+		pagesToCheck.clear();
+		pages.clear();
+		
 		PageLinks page = createPageLinks(startURL.toExternalForm());
 		if (page == null) {
 			System.err.println("Unable to process the start page.");
 			return;
 		}
+		
+		while (!pagesToCheck.isEmpty()) {
+			try {
+				synchronized (pagesToCheck) {
+					pagesToCheck.wait();
+				}
+			}
+			catch (InterruptedException exception) {}
+		}
+		
+		threadPool.shutdown();
+		while (!threadPool.isTerminated()) {
+			try {
+				threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+			}
+			catch (InterruptedException exception) {}
+		}
 	}
 	
 	public PageLinks createPageLinks (String pageURLText) {
 		PageLinks page = null;
-		
+				
 		if (pageURLText == null || pageURLText.length() == 0
 				|| pageURLText.startsWith("#"))
 			return null;
@@ -54,10 +84,12 @@ public class SiteInfo implements PageLinksFactory {
 					page = pages.get(pageURL); 
 					if (page == null)
 					{
-						System.out.println(pageURL.toString());
 						page = new PageLinks(pageURL, this);
 						pages.put(pageURL, page);
-						threadPool.execute(page);
+						pagesToCheck.add(page);
+						
+						PageProcessing task = new PageProcessing(page);
+						threadPool.execute(task);
 					}
 				}
 				
@@ -69,9 +101,32 @@ public class SiteInfo implements PageLinksFactory {
 	}
 	
 	public void outputPageStatistics () {
-		for (URL key : pages.keySet()) {
-			PageLinks page = pages.get(key);
+		ArrayList<PageLinks> table = new ArrayList<PageLinks>(pages.values());
+		Collections.sort(table);
+
+		for (PageLinks page : table) {
 			System.out.println(page.getPageURL() + " " + page.getLinkCount());
 		}
+	}
+	
+	private class PageProcessing implements Runnable {
+		protected PageLinks page;
+		
+		public PageProcessing (PageLinks page) {
+			this.page = page;
+		}
+
+		@Override
+		public void run() {
+			page.run();
+			pagesToCheck.remove(page);
+			if (pagesToCheck.isEmpty()) {
+				synchronized (pagesToCheck) {
+					pagesToCheck.notify();
+				}
+			}
+		}
+		
+		
 	}
 }
