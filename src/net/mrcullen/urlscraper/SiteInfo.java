@@ -41,6 +41,10 @@ public class SiteInfo implements PageLinksFactory {
 	public PageLinks createPageLinks (String pageURLText) {
 		PageLinks page = null;
 		
+		if (pageURLText == null || pageURLText.length() == 0
+				|| pageURLText.startsWith("#"))
+			return null;
+		
 		try {
 			URL pageURL = new URL (baseURL, pageURLText);
 			
@@ -62,5 +66,12 @@ public class SiteInfo implements PageLinksFactory {
 		}
 		catch (MalformedURLException exception) { }
 		return page;
+	}
+	
+	public void outputPageStatistics () {
+		for (URL key : pages.keySet()) {
+			PageLinks page = pages.get(key);
+			System.out.println(page.getPageURL() + " " + page.getLinkCount());
+		}
 	}
 }

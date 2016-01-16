@@ -39,10 +39,17 @@ public class URLScraper {
 			
 			SiteInfo site = new SiteInfo (firstURL);
 			site.process();
+			
+			// ARGHHHH !! Annoying me!
+			Thread.sleep(20000);
+			site.outputPageStatistics();
 		}
 		catch(MalformedURLException exception) {
 			System.err.println("Incorrect URL specified: " + inputURL);
 			System.exit(1);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}		
 	}
 

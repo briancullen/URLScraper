@@ -2,7 +2,10 @@ package net.mrcullen.urlscraper;
 
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -33,14 +36,20 @@ public class PageLinks implements Runnable {
 	
 	public void processPage ()
 			throws IOException {
-		Document doc = Jsoup.connect(pageURL.toExternalForm()).get();
-		pageName = doc.title();
+		Pattern regex = Pattern.compile("text/html");
 		
-		Elements elements = doc.getElementsByTag("a");
-		for (Element element : elements) {
-			PageLinks newPage = factory.createPageLinks(element.attr("href"));
-			if (newPage != null) {
-				links.add(newPage);
+		URLConnection connection = pageURL.openConnection();
+		if (regex.matcher(connection.getContentType()).find()) {
+			Document doc = Jsoup.parse(connection.getInputStream(),
+					connection.getContentEncoding(), pageURL.toExternalForm());
+			pageName = doc.title();
+			
+			Elements elements = doc.getElementsByTag("a");
+			for (Element element : elements) {
+				PageLinks newPage = factory.createPageLinks(element.attr("href"));
+				if (newPage != null) {
+					links.add(newPage);
+				}
 			}
 		}
 	}
