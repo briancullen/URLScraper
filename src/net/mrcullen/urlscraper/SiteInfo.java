@@ -10,18 +10,38 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+@XmlRootElement( name="site" )
+@XmlType ( propOrder={"pages"} )
+@XmlAccessorType ( XmlAccessType.NONE )
 public class SiteInfo implements PageInfoFactory {
+	
+	@XmlJavaTypeAdapter (PageMapAdapter.class)
+	@XmlElement ( required = true )
 	protected ConcurrentHashMap<URL, PageInfo> pages = new ConcurrentHashMap<URL, PageInfo>();
+	
 	protected transient AtomicInteger pagesToCheck = new AtomicInteger ();
 	
 	
 	protected URL baseURL = null;
+	
+	@XmlAttribute ( name = "location", required = true )
 	protected URL startURL = null;
 	
 	protected transient ExecutorService threadPool = Executors.newCachedThreadPool();
 	
+	protected SiteInfo () { }
+	
 	public SiteInfo (URL startURL)
 			throws MalformedURLException {
+		
 		String relativeURL = startURL.getPath();
 		if (relativeURL.matches(".+\\.(html?|php)$")) {
 			String[] components = relativeURL.split("/");
@@ -31,11 +51,15 @@ public class SiteInfo implements PageInfoFactory {
 				relativeURL += components[index] + "/";
 			}
 		}
+		else if (!relativeURL.endsWith("/")) {
+			relativeURL += "/";
+			startURL = new URL (startURL, relativeURL);
+		}
 		
+		baseURL = new URL(startURL, relativeURL);		
 		this.startURL = startURL;
-		baseURL = new URL(startURL, relativeURL);
 	}
-	
+		
 	public void process () {
 		pagesToCheck.set(0);
 		pages.clear();

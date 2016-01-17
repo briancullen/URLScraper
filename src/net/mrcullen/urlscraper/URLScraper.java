@@ -6,6 +6,10 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+
 public class URLScraper {
 	
 	public static void main(String[] args) {
@@ -40,13 +44,22 @@ public class URLScraper {
 			SiteInfo site = new SiteInfo (firstURL);
 			site.process();
 			
-			// ARGHHHH !! Annoying me!
-			// Thread.sleep(20000);
 			site.outputPageStatistics();
+			
+			JAXBContext jaxbContext = JAXBContext.newInstance(SiteInfo.class, PageInfo.class);
+			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+
+			// output pretty printed
+			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			jaxbMarshaller.marshal(site, System.out);
+
+
 		}
 		catch(MalformedURLException exception) {
 			System.err.println("Incorrect URL specified: " + inputURL);
 			System.exit(1);
+		} catch (JAXBException e) {
+			e.printStackTrace();
 		}		
 	}
 

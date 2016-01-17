@@ -6,18 +6,36 @@ import java.net.URLConnection;
 import java.util.HashSet;
 import java.util.regex.Pattern;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.jsoup.Jsoup;
 
+@XmlRootElement( name="page" )
+@XmlType ( propOrder={"pageName", "linkCount"} )
+@XmlAccessorType ( XmlAccessType.NONE )
 public class PageInfo implements Runnable, Comparable<PageInfo> {
-	protected HashSet<PageInfo> links = new HashSet<PageInfo>();
+	protected HashSet<LinkInfo> outgoingLinks = new HashSet<LinkInfo>();
+	protected HashSet<LinkInfo> incomingLinks = new HashSet<LinkInfo>();
 	protected PageInfoFactory factory = null;
 	
-	protected URL pageURL = null;
+	@XmlElement ( name = "name", required = true )
 	protected String pageName = null;
+	
+	@XmlAttribute ( name = "location", required = true )
+	protected URL pageURL = null;
+	
+	@XmlElement ( name = "links", required = true )
 	protected int linkCount = 0;
+	
+	protected PageInfo () { }
 	
 	public PageInfo (URL url, PageInfoFactory factory) {
 		if (url == null) {
@@ -33,6 +51,10 @@ public class PageInfo implements Runnable, Comparable<PageInfo> {
 	public int getLinkCount () { return linkCount; }
 	public synchronized void incrementLinkCount () { linkCount++; }
 	
+	public boolean addIncomingLink (String linkText, PageInfo sourcePage) {
+		return incomingLinks.add(new LinkInfo(linkText, sourcePage, this));
+	}
+	
 	public void processPage ()
 			throws IOException {
 		Pattern regex = Pattern.compile("text/html");
@@ -47,7 +69,8 @@ public class PageInfo implements Runnable, Comparable<PageInfo> {
 			for (Element element : elements) {
 				PageInfo newPage = factory.createPageLinks(element.attr("href"));
 				if (newPage != null) {
-					links.add(newPage);
+					outgoingLinks.add(new LinkInfo (element.text(), this, newPage));
+					newPage.addIncomingLink(element.text(), this);
 				}
 			}
 		}
