@@ -4,15 +4,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class SiteInfo implements PageLinksFactory {
-	protected ConcurrentHashMap<URL, PageLinks> pages = new ConcurrentHashMap<URL, PageLinks>();
-	protected transient Vector<PageLinks> pagesToCheck = new Vector<PageLinks> ();
+public class SiteInfo implements PageInfoFactory {
+	protected ConcurrentHashMap<URL, PageInfo> pages = new ConcurrentHashMap<URL, PageInfo>();
+	protected transient AtomicInteger pagesToCheck = new AtomicInteger ();
 	
 	
 	protected URL baseURL = null;
@@ -37,16 +37,16 @@ public class SiteInfo implements PageLinksFactory {
 	}
 	
 	public void process () {
-		pagesToCheck.clear();
+		pagesToCheck.set(0);
 		pages.clear();
 		
-		PageLinks page = createPageLinks(startURL.toExternalForm());
+		PageInfo page = createPageLinks(startURL.toExternalForm());
 		if (page == null) {
 			System.err.println("Unable to process the start page.");
 			return;
 		}
 		
-		while (!pagesToCheck.isEmpty()) {
+		while (pagesToCheck.get() != 0) {
 			try {
 				synchronized (pagesToCheck) {
 					pagesToCheck.wait();
@@ -64,8 +64,8 @@ public class SiteInfo implements PageLinksFactory {
 		}
 	}
 	
-	public PageLinks createPageLinks (String pageURLText) {
-		PageLinks page = null;
+	public PageInfo createPageLinks (String pageURLText) {
+		PageInfo page = null;
 				
 		if (pageURLText == null || pageURLText.length() == 0
 				|| pageURLText.startsWith("#"))
@@ -80,9 +80,9 @@ public class SiteInfo implements PageLinksFactory {
 					page = pages.get(pageURL); 
 					if (page == null)
 					{
-						page = new PageLinks(pageURL, this);
+						page = new PageInfo(pageURL, this);
 						pages.put(pageURL, page);
-						pagesToCheck.add(page);
+						pagesToCheck.getAndIncrement();
 						
 						PageProcessing task = new PageProcessing(page);
 						threadPool.execute(task);
@@ -97,26 +97,25 @@ public class SiteInfo implements PageLinksFactory {
 	}
 	
 	public void outputPageStatistics () {
-		ArrayList<PageLinks> table = new ArrayList<PageLinks>(pages.values());
+		ArrayList<PageInfo> table = new ArrayList<PageInfo>(pages.values());
 		Collections.sort(table);
 
-		for (PageLinks page : table) {
+		for (PageInfo page : table) {
 			System.out.println(page.getPageURL() + " " + page.getLinkCount());
 		}
 	}
 	
 	private class PageProcessing implements Runnable {
-		protected PageLinks page;
+		protected PageInfo page;
 		
-		public PageProcessing (PageLinks page) {
+		public PageProcessing (PageInfo page) {
 			this.page = page;
 		}
 
 		@Override
 		public void run() {
 			page.run();
-			pagesToCheck.remove(page);
-			if (pagesToCheck.isEmpty()) {
+			if (pagesToCheck.decrementAndGet() == 0) {
 				synchronized (pagesToCheck) {
 					pagesToCheck.notify();
 				}

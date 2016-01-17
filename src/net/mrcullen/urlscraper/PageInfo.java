@@ -11,15 +11,15 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.jsoup.Jsoup;
 
-public class PageLinks implements Runnable, Comparable<PageLinks> {
-	protected HashSet<PageLinks> links = new HashSet<PageLinks>();
-	protected PageLinksFactory factory = null;
+public class PageInfo implements Runnable, Comparable<PageInfo> {
+	protected HashSet<PageInfo> links = new HashSet<PageInfo>();
+	protected PageInfoFactory factory = null;
 	
 	protected URL pageURL = null;
 	protected String pageName = null;
 	protected int linkCount = 0;
 	
-	public PageLinks (URL url, PageLinksFactory factory) {
+	public PageInfo (URL url, PageInfoFactory factory) {
 		if (url == null) {
 			throw new NullPointerException("Null URL provided.");
 		}
@@ -45,7 +45,7 @@ public class PageLinks implements Runnable, Comparable<PageLinks> {
 			
 			Elements elements = doc.getElementsByTag("a");
 			for (Element element : elements) {
-				PageLinks newPage = factory.createPageLinks(element.attr("href"));
+				PageInfo newPage = factory.createPageLinks(element.attr("href"));
 				if (newPage != null) {
 					links.add(newPage);
 				}
@@ -64,7 +64,7 @@ public class PageLinks implements Runnable, Comparable<PageLinks> {
 	}
 
 	@Override
-	public int compareTo(PageLinks other) {
+	public int compareTo(PageInfo other) {
 		return linkCount - other.linkCount;
 	}
 	
