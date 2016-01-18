@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,23 +26,19 @@ public class SiteInfo implements PageInfoFactory {
 	
 	@XmlJavaTypeAdapter (PageMapAdapter.class)
 	@XmlElement ( required = true )
-	protected ConcurrentHashMap<URL, PageInfo> pages = new ConcurrentHashMap<URL, PageInfo>();
+	private ConcurrentHashMap<URL, PageInfo> pages = new ConcurrentHashMap<URL, PageInfo>();
 	
-	protected transient AtomicInteger pagesToCheck = new AtomicInteger ();
+	private transient AtomicInteger pagesToCheck = new AtomicInteger ();
 	
-	
-	protected URL baseURL = null;
+	private URL baseURL = null;
+	private URL startURL = null;
 	
 	@XmlAttribute ( name = "location", required = true )
-	protected URL startURL = null;
+	public URL getStartURL () {
+		return startURL;
+	}
 	
-	protected transient ExecutorService threadPool = Executors.newCachedThreadPool();
-	
-	protected SiteInfo () { }
-	
-	public SiteInfo (URL startURL)
-			throws MalformedURLException {
-		
+	protected void setStartURL (URL startURL) throws MalformedURLException {
 		String relativeURL = startURL.getPath();
 		if (relativeURL.matches(".+\\.(html?|php)$")) {
 			String[] components = relativeURL.split("/");
@@ -58,6 +55,17 @@ public class SiteInfo implements PageInfoFactory {
 		
 		baseURL = new URL(startURL, relativeURL);		
 		this.startURL = startURL;
+	}
+	
+	public Iterator<PageInfo> getSitePages() { return pages.values().iterator(); }
+	
+	protected transient ExecutorService threadPool = Executors.newCachedThreadPool();
+	
+	protected SiteInfo () { }
+	
+	public SiteInfo (URL startURL)
+			throws MalformedURLException {
+		setStartURL(startURL);
 	}
 		
 	public void process () {
@@ -145,7 +153,5 @@ public class SiteInfo implements PageInfoFactory {
 				}
 			}
 		}
-		
-		
 	}
 }

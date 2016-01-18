@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -19,21 +20,25 @@ import org.jsoup.select.Elements;
 import org.jsoup.Jsoup;
 
 @XmlRootElement( name="page" )
-@XmlType ( propOrder={"pageName", "linkCount"} )
+@XmlType ( propOrder={"pageName", "linkCount", "incomingLinks", "outgoingLinks" } )
 @XmlAccessorType ( XmlAccessType.NONE )
 public class PageInfo implements Runnable, Comparable<PageInfo> {
-	protected HashSet<LinkInfo> outgoingLinks = new HashSet<LinkInfo>();
-	protected HashSet<LinkInfo> incomingLinks = new HashSet<LinkInfo>();
-	protected PageInfoFactory factory = null;
+	
+	@XmlElement ( name = "outgoing", required = true )
+	private HashSet<LinkInfo> outgoingLinks = new HashSet<LinkInfo>();
+	
+	@XmlElement ( name = "incoming", required = true )
+	private HashSet<LinkInfo> incomingLinks = new HashSet<LinkInfo>();
+	private PageInfoFactory factory = null;
 	
 	@XmlElement ( name = "name", required = true )
-	protected String pageName = null;
+	private String pageName = null;
 	
 	@XmlAttribute ( name = "location", required = true )
-	protected URL pageURL = null;
+	private URL pageURL = null;
 	
 	@XmlElement ( name = "links", required = true )
-	protected int linkCount = 0;
+	private int linkCount = 0;
 	
 	protected PageInfo () { }
 	
@@ -50,6 +55,9 @@ public class PageInfo implements Runnable, Comparable<PageInfo> {
 	public String getPageName () { return pageName; }
 	public int getLinkCount () { return linkCount; }
 	public synchronized void incrementLinkCount () { linkCount++; }
+	
+	public Iterator<LinkInfo> getIncomingLinks () { return incomingLinks.iterator(); }
+	public Iterator<LinkInfo> getOutgoingLinks () { return outgoingLinks.iterator(); }
 	
 	public boolean addIncomingLink (String linkText, PageInfo sourcePage) {
 		return incomingLinks.add(new LinkInfo(linkText, sourcePage, this));

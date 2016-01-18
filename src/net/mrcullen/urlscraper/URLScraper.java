@@ -1,14 +1,19 @@
 package net.mrcullen.urlscraper;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 
 public class URLScraper {
 	
@@ -45,20 +50,32 @@ public class URLScraper {
 			site.process();
 			
 			site.outputPageStatistics();
+			System.out.println("********************************");
 			
 			JAXBContext jaxbContext = JAXBContext.newInstance(SiteInfo.class, PageInfo.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 
 			// output pretty printed
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-			jaxbMarshaller.marshal(site, System.out);
+			
+			ByteArrayOutputStream ostream = new ByteArrayOutputStream();
+			jaxbMarshaller.marshal(site, ostream);
 
+			System.out.println(ostream.toString());
+			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+//			SiteInfo info = (SiteInfo)jaxbUnmarshaller.unmarshal(new ByteArrayInputStream (ostream.toByteArray()));
+			System.out.println("********************************");
+
+			
 
 		}
 		catch(MalformedURLException exception) {
 			System.err.println("Incorrect URL specified: " + inputURL);
 			System.exit(1);
 		} catch (JAXBException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}

@@ -1,11 +1,25 @@
 package net.mrcullen.urlscraper;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlRootElement( name="link" )
+@XmlType ( propOrder={} )
+@XmlAccessorType ( XmlAccessType.NONE )
 public class LinkInfo {
 	
-	protected String linkText;
+	@XmlAttribute (name = "text", required = true)
+	private String linkText;
+
+	private PageInfo targetPage;
 	
-	protected PageInfo targetPage;
-	protected PageInfo sourcePage;
+	private PageInfo sourcePage;
+	
+	private LinkInfo () {}
 	
 	public LinkInfo (String linkText, PageInfo sourcePage, PageInfo targetPage) {
 		if (linkText == null || sourcePage == null || targetPage == null) {
