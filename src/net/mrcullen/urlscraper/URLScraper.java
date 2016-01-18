@@ -13,6 +13,7 @@ import java.net.URL;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.bind.Unmarshaller;
 
 public class URLScraper {
@@ -66,6 +67,8 @@ public class URLScraper {
 //			SiteInfo info = (SiteInfo)jaxbUnmarshaller.unmarshal(new ByteArrayInputStream (ostream.toByteArray()));
 			System.out.println("********************************");
 
+			SchemaOutputResolver outputResolver = new TestSchemaOutputResolver ();
+			jaxbContext.generateSchema(outputResolver);
 			
 
 		}
